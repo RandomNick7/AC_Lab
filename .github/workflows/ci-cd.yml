@@ -134,3 +134,8 @@ jobs:
       # If the new pods fail readiness checks, this step fails and the pipeline surfaces the error & old pods continue serving traffic
       - name: Wait for rollout to complete
         run: kubectl rollout status deployment/cloud-app -n cloud-app --timeout=120s
+
+      # ServiceMonitor depends on the CRD shipped by kube-prometheus-stack.
+      # That chart is installed once manually (cluster setup), so this step is safe to run on every deploy
+      - name: Apply monitoring manifests
+        run: kubectl apply -f k8s/monitoring/
