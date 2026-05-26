@@ -3,6 +3,9 @@ kind: Service
 metadata:
   name: cloud-app
   namespace: cloud-app
+  labels:
+    app: cloud-app
+  
 spec:
   # ClusterIP exposes the app internally
   # External traffic is handled by the Ingress -> GCP Load Balancer
@@ -10,6 +13,7 @@ spec:
   selector:
     app: cloud-app
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: 80
       targetPort: 8080
