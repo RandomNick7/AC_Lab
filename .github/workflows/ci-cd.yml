@@ -116,7 +116,8 @@ jobs:
       # Stamp the exact image tag produced by Job 2 into the deployment manifest before applying it, making every deploy traceable to a specific commit
       - name: Substitute image tag in deployment manifest
         run: |
-          IMAGE="${{ env.IMAGE_NAME }}:${{ needs.docker-build-push.outputs.image-tag }}"
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          IMAGE="${{ env.IMAGE_NAME }}:sha-${SHORT_SHA}"
           sed -i "s|IMAGE_PLACEHOLDER|${IMAGE}|g" k8s/deployment.yaml
 
       # Apply the namespace first so all subsequent resources have somewhere to land
