@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-app
+  namespace: cloud-app
+  labels:
+    app: cloud-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cloud-app
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1        # Spin up 1 extra pod before killing old ones
+      maxUnavailable: 0  # Never reduce below desired replica count during update
+
+  template:
+    metadata:
+      labels:
+        app: cloud-app
+    spec:
+      containers:
+        - name: cloud-app
+          # IMAGE_PLACEHOLDER is replaced by the CI pipeline via sed before kubectl apply
+          image: IMAGE_PLACEHOLDER
+          ports:
+            - containerPort: 8080
+
+          # Resource limits are required for the HPA to make autoscaling decisions
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
+          # Readiness probe: pod only receives traffic once Spring is fully started.
+          # This is the second guard for zero-downtime deploys:
+          # the old pod is only terminated after the new one passes readiness.
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+
+          # Kubernetes restarts the pod if the app becomes unresponsive
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 15
