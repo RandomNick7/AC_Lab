@@ -8,6 +8,6 @@ class MainController {
 
     @GetMapping("/")
     fun main(): String {
-        return "This is a test for auto-update!"
+        return "Placeholder for a landing page..."
     }
 }
