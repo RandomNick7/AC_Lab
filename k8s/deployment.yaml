@@ -38,14 +38,21 @@ spec:
               cpu: 500m
               memory: 512Mi
 
-          # Readiness probe: pod only receives traffic once Spring is fully started.
-          # This is the second guard for zero-downtime deploys:
-          # the old pod is only terminated after the new one passes readiness.
+ 
+          # Gives the app up to 60s to finish booting
+          startupProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            failureThreshold: 6
+            periodSeconds: 10
+ 
+          # Readiness probe - pod only receives traffic once Spring Boot is fully started.
+          # The old pod is only terminated after the new one passes this (step 7 — zero downtime).
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 8080
-            initialDelaySeconds: 15
             periodSeconds: 10
 
           # Kubernetes restarts the pod if the app becomes unresponsive
