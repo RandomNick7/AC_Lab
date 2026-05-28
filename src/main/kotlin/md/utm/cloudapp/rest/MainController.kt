@@ -8,6 +8,6 @@ class MainController {
 
     @GetMapping("/")
     fun main(): String {
-        return "Placeholder for a landing page..."
+        return "Placeholder for a landing page... 00"
     }
 }
